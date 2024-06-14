@@ -1,4 +1,4 @@
-import { Pokemon } from "@/pokemons";
+import { Pokemon, PokemonsResponse } from "@/pokemons";
 import { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -9,12 +9,16 @@ interface Props {
 
 //! En build time
 export async function generateStaticParams() {
-  const static151Pokemons = Array.from({ length: 151 }).map(
-    (v, i) => `${i + 1}`
-  );
+  const data: PokemonsResponse = await fetch(
+    `https://pokeapi.co/api/v2/pokemon?limit=151`
+  ).then((res) => res.json());
 
-  return static151Pokemons.map((id) => ({
-    id: id,
+  const static151Pokemons = data.results.map((pokemon) => ({
+    name: pokemon.name,
+  }));
+
+  return static151Pokemons.map(({ name }) => ({
+    name: name,
   }));
 }
 
@@ -35,7 +39,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 const getPokemon = async (name: string): Promise<Pokemon> => {
   try {
-    const pokemon = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`, {
+    const pokemon = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`, {
       // cache: "force-cache", //TODO: Cambiar esto en un futuro
       next: {
         revalidate: 60 * 60 * 30 * 6,
@@ -139,3 +143,64 @@ export default async function PokemonPage({ params }: Props) {
     </div>
   );
 }
+
+//TODO: Formulario
+export const AsignaturaFormulario = () => {
+  return (
+    <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 flex flex-col my-5">
+      <div className="-mx-3 md:flex mb-6 mr-80">
+        <div className="md:w-full px-3">
+          <label
+            className="block uppercase tracking-wide text-grey-darker text-xs font-bold mb-2"
+            htmlFor="grid-password"
+          >
+            Asignatura
+          </label>
+          <input
+            className="appearance-none block w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4 mb-3"
+            id="asignatura"
+            type="text"
+            placeholder="Ingrese la nueva asignatura"
+          />
+          <p className="text-grey-dark text-xs italic">
+            Ejemplo: Introducción a la informática
+          </p>
+        </div>
+      </div>
+      <div className="-mx-3 md:flex mb-6">
+        <div className="md:w-full px-3">
+          <label
+            className="block uppercase tracking-wide text-grey-darker text-xs font-bold mb-2"
+            htmlFor="grid-abreviado"
+          >
+            Abreviado
+          </label>
+          <input
+            className="appearance-none block w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4"
+            id="abreviado"
+            type="text"
+            placeholder="Ingrese el nombre corto de asignatura"
+          />
+          <p className="text-grey-dark text-xs italic">Ejemplo: IFT-101</p>
+        </div>
+      </div>
+      <div className="-mx-3 md:flex mb-6">
+        <div className="md:w-full px-3">
+          <label
+            className="block uppercase tracking-wide text-grey-darker text-xs font-bold mb-2"
+            htmlFor="grid-password"
+          >
+            Código
+          </label>
+          <input
+            className="appearance-none block w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4"
+            id="codigo"
+            type="text"
+            placeholder="Ingrese el código de asignatura"
+          />
+          <p className="text-grey-dark text-xs italic">Ejemplo: 38784</p>
+        </div>
+      </div>
+    </div>
+  );
+};
